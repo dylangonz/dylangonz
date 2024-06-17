@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Precisión </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .game-area {
+            position: relative;
+            height: 300px;
+            background-color: #ddd;
+            margin: 20px 0;
+        }
+
+        .target {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        p {
+            margin-top: 20px;
+        }
+
+        #timer {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Juego de Precisión </h1>
+        <div id="loginArea">
+            <label for="username">Nombre de Usuario:</label>
+            <input type="text" id="username">
+            <br><br>
+            <label for="timeSelect">Selecciona el tiempo de juego:</label>
+            <select id="timeSelect">
+                <option value="30">30 segundos</option>
+                <option value="60">60 segundos</option>
+                <option value="90">90 segundos</option>
+            </select>
+            <br><br>
+            <button onclick="startGame()">Iniciar Juego</button>
+        </div>
+        <div id="gameArea" class="game-area" style="display: none;">
+            <!-- Área donde aparecerán los objetivos -->
+        </div>
+        <p id="scoreInfo" style="display: none;">Puntaje: <span id="score">0</span></p>
+        <p id="timer"> <span id="countdown"></span> </p>
+        <button onclick="resetGame()" style="display: none;">Reiniciar Juego</button>
+    </div>
+
+    <script>
+        let username = '';
+        let score = 0;
+        let countdown = 30; // Tiempo predeterminado en segundos
+        let timerInterval;
+
+        function startGame() {
+            username = document.getElementById('username').value.trim();
+            if (username === '') {
+                alert('Por favor ingresa un nombre de usuario válido.');
+                return;
+            }
+
+            const selectedTime = parseInt(document.getElementById('timeSelect').value, 10);
+            if (!selectedTime || selectedTime <= 0) {
+                alert('Por favor selecciona un tiempo válido.');
+                return;
+            }
+
+            countdown = selectedTime; // Establecer el tiempo de juego seleccionado
+
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('scoreInfo').style.display = 'block';
+            document.getElementById('timer').style.display = 'block';
+            document.querySelector('button').style.display = 'block';
+
+            // Mostrar el tiempo restante inicial
+            document.getElementById('countdown').textContent = countdown;
+
+            // Función para actualizar el tiempo cada segundo
+            timerInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').textContent = countdown;
+
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+
+            // Función para crear objetivos
+            function createTarget() {
+                const gameArea = document.getElementById('gameArea');
+                const target = document.createElement('div');
+                target.classList.add('target');
+
+                const posX = Math.random() * (gameArea.offsetWidth - 50);
+                const posY = Math.random() * (gameArea.offsetHeight - 50);
+
+                target.style.top = posY + 'px';
+                target.style.left = posX + 'px';
+
+                target.addEventListener('click', () => {
+                    score++;
+                    document.getElementById('score').textContent = score;
+                    gameArea.removeChild(target);
+                });
+
+                gameArea.appendChild(target);
+
+                // Objetivo desaparece más rápidamente después de aparecer
+                setTimeout(() => {
+                    if (target.parentNode === gameArea) {
+                        gameArea.removeChild(target);
+                    }
+                }, 1500); // Cambiado de 3000 a 1500 para desaparecer más rápido
+            }
+
+            // Generar un nuevo objetivo cada 2 segundos
+            setInterval(createTarget, 2000);
+        }
+
+        function endGame() {
+            alert(`¡Tiempo agotado! ${username}, tu puntaje final es ${score}.`);
+            resetGame();
+        }
+
+        function resetGame() {
+            document.getElementById('username').value = '';
+            document.getElementById('timeSelect').value = '30'; // Reiniciar selección de tiempo a 30 segundos
+            document.getElementById('loginArea').style.display = 'block';
+            document.getElementById('gameArea').innerHTML = '';
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('scoreInfo').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+            document.querySelector('button').style.display = 'none';
+            score = 0;
+            countdown = 30;
+            document.getElementById('score').textContent = score;
+            document.getElementById('countdown').textContent = countdown;
+
+            // Limpiar el intervalo del temporizador si existe
+            clearInterval(timerInterval);
+        }
+    </script>
+</body>
+</html>
+
+
+
+
